@@ -1,0 +1,99 @@
+version: 2
+
+models: 
+
+  - name: customer_dim
+    description: '{{ doc("customer_dim") }}'
+    columns:
+      - name: c_customer_sk   
+        description: Primary key for customer_dim. It is unique and not null
+        tests: 
+          - unique
+          - not_null
+
+      - name: c_preferred_cust_flag
+        description: Values that can be found in the column
+        tests: 
+          - accepted_values:
+              values: ['N', 'Y', 'Unknown']
+
+      - name: ca_location_type
+        description: | 
+          Values representing apartment types such as 
+          condo, apartment, single family, and those yet classified
+        tests: 
+          - accepted_values:
+              values: ['single family', 'condo', 'apartment', 'Unknown'] 
+  
+
+  - name: date_dim
+    description: The calendar / date table
+    columns:
+      - name: d_date_sk  
+        description: | 
+          Represents calendar date. 
+          It is the primary key in model date_dim, is unique, not null 
+          and foreign key to sold_wk_sk in fact_weekly_sales_inventory model. 
+        tests: 
+          - unique
+          - not_null
+      - name: day_of_wk_num
+        description: | 
+          It symbolizes a day in the week represented with number e.g 
+          Sunday = 0, Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4 
+          and Friday = 5 and Saturday = 6
+        tests: 
+          - accepted_values:
+              values: [0, 1, 2, 3, 4, 5, 6]
+
+
+  - name: item_dim
+    description: | 
+      Item dimension model. Contains attributes of items that are stocked in 
+      the inventory
+    columns:
+      - name: i_item_sk 
+        description: | 
+          It is the primary key in model item_dim, is unique, not null and 
+          foreign key to item_sk in fact_weekly_sales_inventory model
+        tests: 
+          - unique
+          - not_null
+
+
+  - name: warehouse_dim
+    description: model for the warehouse dimension
+    columns:
+      - name: w_warehouse_sk
+        description: | 
+          It is the primary key for warehouse_dim, is unique, not null and 
+          foreign key to fact_weekly_sales_inventory model
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('fact_weekly_sales_inventory')
+              field: warehouse_sk
+
+
+  - name: fact_weekly_sales_inventory
+    description: '{{ doc("fact_weekly_sales_inventory") }}'
+    columns:
+      - name: warehouse_sk
+      - name: item_sk
+      - name: sold_wk_sk
+        tests:
+          - not_null
+
+    tests: 
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - warehouse_sk
+            - item_sk
+            - sold_wk_sk
+  
+    tests:
+      - dbt_expectations.expect_column_distinct_count_to_equal_other_table:
+          column_name: warehouse_sk
+          compare_model: ref("warehouse_dim")
+          compare_column_name: w_warehouse_sk

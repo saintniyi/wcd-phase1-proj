@@ -1,0 +1,36 @@
+version: 2
+
+sources:
+  - name: tpcds
+    database: tpcds
+    schema: raw
+
+    freshness:
+        warn_after: {count: 12, period: hour}
+        error_after: {count: 24, period: hour}
+    loaded_at_field: _airbyte_normalized_at
+
+    tables:
+      - name: catalogsales
+        identifier: catalog_sales
+      - name: customer
+        identifier: customer
+      - name: customeraddress
+        identifier: customer_address
+      - name: customerdemographics
+        identifier: customer_demographics
+      - name: datedim
+        identifier: date_dim
+      - name: householddemographics
+        identifier: household_demographics
+      - name: incomeband
+        identifier: income_band
+      - name: inventory
+        identifier: inventory
+        freshness: null
+      - name: item
+        identifier: item
+      - name: warehouse
+        identifier: warehouse
+      - name: websales
+        identifier: web_sales
