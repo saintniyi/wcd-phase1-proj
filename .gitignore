@@ -1,0 +1,4 @@
+dbt_projects/dbt_tpcds/target/
+dbt_projects/dbt_tpcds/dbt_packages/
+ignoreFolder/
+*.txt
